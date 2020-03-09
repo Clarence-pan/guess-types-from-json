@@ -2,16 +2,17 @@ import React, { useState } from "react";
 import "./styles.css";
 
 export default function App() {
+  const [isIoTsStyle, setIsIoTsStyle] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [types, setTypes] = useState(null);
   const transformToTypes = () => {
     try {
       // eslint-disable-next-line
       const jsonValue = eval(`(${inputValue})`);
-      setTypes(guessTypesFromJsonValue(jsonValue));
+      setTypes(guessTypesFromJsonValue(jsonValue, 0, { isIoTsStyle }));
     } catch (e) {
       console.error("Got error: ", e);
-      window.alert(`${e}`);
+      window.alert(e + "");
     }
   };
 
@@ -29,6 +30,16 @@ export default function App() {
       <button type="button" onClick={transformToTypes}>
         guess types
       </button>
+      <label>
+        <input
+          type="checkbox"
+          checked={isIoTsStyle}
+          onChange={e => {
+            setIsIoTsStyle(e.target.checked);
+          }}
+        />
+        io-ts style
+      </label>
       {!!types && (
         <div className="types-wrap">
           <h3>Types </h3>
@@ -41,30 +52,40 @@ export default function App() {
   );
 }
 
-function guessTypesFromJsonValue(data, indent = 0) {
+function guessTypesFromJsonValue(data, indent = 0, options = {}) {
   if (data === null) {
-    return "null";
+    return options.isIoTsStyle ? "t.optionalString" : "string | null";
   }
 
   if (typeof data === "object") {
     if (Array.isArray(data)) {
-      return `Array<${guessTypesFromJsonValue(data[0], indent + 1)}>`;
+      if (options.isIoTsStyle) {
+        return `t.array(${guessTypesFromJsonValue(
+          data[0],
+          indent + 1,
+          options
+        )})`;
+      }
+      return `Array<${guessTypesFromJsonValue(data[0], indent + 1, options)}>`;
     } else {
-      return [
+      const objectTypes = [
         "{",
         ...Object.entries(data).map(
           ([k, v]) =>
             `${indentBySpace(indent + 1)}${k}: ${guessTypesFromJsonValue(
               v,
-              indent + 1
+              indent + 1,
+              options
             )},`
         ),
         indentBySpace(indent) + "}"
       ].join("\n");
+
+      return options.isIoTsStyle ? `t.type(${objectTypes})` : objectTypes;
     }
   }
 
-  return typeof data;
+  return options.isIoTsStyle ? `t.${typeof data}` : typeof data;
 }
 
 function indentBySpace(indent) {
