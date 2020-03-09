@@ -1,0 +1,15 @@
+.App {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+textarea {
+  display: block;
+  width: 90%;
+  margin: 0 auto;
+  height: 50vh;
+}
+
+.types {
+  text-align: left;
+}
