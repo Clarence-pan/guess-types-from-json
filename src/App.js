@@ -60,11 +60,11 @@ function guessTypesFromJsonValue(data, indent = 0, options = {}) {
   if (typeof data === "object") {
     if (Array.isArray(data)) {
       if (options.isIoTsStyle) {
-        return `t.optional(t.array(${guessTypesFromJsonValue(
+        return `t.optionalArray(${guessTypesFromJsonValue(
           data[0],
           indent + 1,
           options
-        )}))`;
+        )})`;
       }
       return `Array<${guessTypesFromJsonValue(data[0], indent + 1, options)}>`;
     } else {
@@ -83,8 +83,8 @@ function guessTypesFromJsonValue(data, indent = 0, options = {}) {
 
       return options.isIoTsStyle
         ? options.typeName
-          ? `t.optional(t.type(${objectTypes}, "${options.typeName}"))`
-          : `t.optional(t.type(${objectTypes}))`
+          ? `t.optionalType(${objectTypes}, "${options.typeName}")`
+          : `t.optionalType(${objectTypes})`
         : objectTypes;
     }
   }
