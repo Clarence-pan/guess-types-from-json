@@ -75,13 +75,17 @@ function guessTypesFromJsonValue(data, indent = 0, options = {}) {
             `${indentBySpace(indent + 1)}${k}: ${guessTypesFromJsonValue(
               v,
               indent + 1,
-              options
+              { ...options, typeName: k.replace(/^./, f => f.toUpperCase()) }
             )},`
         ),
         indentBySpace(indent) + "}"
       ].join("\n");
 
-      return options.isIoTsStyle ? `t.type(${objectTypes})` : objectTypes;
+      return options.isIoTsStyle
+        ? options.typeName
+          ? `t.type(${objectTypes}, "${options.typeName}")`
+          : `t.type(${objectTypes})`
+        : objectTypes;
     }
   }
 
