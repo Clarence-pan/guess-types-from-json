@@ -60,11 +60,11 @@ function guessTypesFromJsonValue(data, indent = 0, options = {}) {
   if (typeof data === "object") {
     if (Array.isArray(data)) {
       if (options.isIoTsStyle) {
-        return `t.array(${guessTypesFromJsonValue(
+        return `t.optional(t.array(${guessTypesFromJsonValue(
           data[0],
           indent + 1,
           options
-        )})`;
+        )}))`;
       }
       return `Array<${guessTypesFromJsonValue(data[0], indent + 1, options)}>`;
     } else {
@@ -83,15 +83,21 @@ function guessTypesFromJsonValue(data, indent = 0, options = {}) {
 
       return options.isIoTsStyle
         ? options.typeName
-          ? `t.type(${objectTypes}, "${options.typeName}")`
-          : `t.type(${objectTypes})`
+          ? `t.optional(t.type(${objectTypes}, "${options.typeName}"))`
+          : `t.optional(t.type(${objectTypes}))`
         : objectTypes;
     }
   }
 
-  return options.isIoTsStyle ? `t.${typeof data}` : typeof data;
+  return options.isIoTsStyle
+    ? `t.optional${ucfirst(typeof data)}`
+    : typeof data;
 }
 
 function indentBySpace(indent) {
   return new Array((+indent || 0) * 2).fill(" ").join("");
+}
+
+function ucfirst(s) {
+  return s.replace(/^./, f => f.toUpperCase());
 }
