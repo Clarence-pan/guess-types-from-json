@@ -1,20 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./styles.css";
 
 export default function App() {
   const [isIoTsStyle, setIsIoTsStyle] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [types, setTypes] = useState(null);
-  const transformToTypes = () => {
-    try {
-      // eslint-disable-next-line
-      const jsonValue = eval(`(${inputValue})`);
-      setTypes(guessTypesFromJsonValue(jsonValue, 0, { isIoTsStyle }));
-    } catch (e) {
-      console.error("Got error: ", e);
-      window.alert(e + "");
+  const [error, setError] = useState(null);
+  const transformToTypes = useCallback(() => {
+    if (inputValue) {
+      try {
+        // eslint-disable-next-line
+        const jsonValue = eval(`(${inputValue})`);
+        setTypes(guessTypesFromJsonValue(jsonValue, 0, { isIoTsStyle }));
+        setError(null);
+      } catch (e) {
+        console.error("Got error: ", e);
+        setError(e);
+      }
     }
-  };
+  }, [inputValue, isIoTsStyle]);
+
+  useEffect(() => {
+    transformToTypes();
+  }, [transformToTypes]);
 
   console.log(types);
 
@@ -40,6 +48,7 @@ export default function App() {
         />
         io-ts style
       </label>
+      {!!error && <div className="errors">{`${error}`}</div>}
       {!!types && (
         <div className="types-wrap">
           <h3>Types </h3>

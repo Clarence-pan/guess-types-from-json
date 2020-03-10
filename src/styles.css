@@ -22,3 +22,7 @@ label {
   display: block;
   font-size: 80%;
 }
+
+.errors {
+  color: red;
+}
